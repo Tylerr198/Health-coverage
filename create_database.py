@@ -10,7 +10,6 @@ def load_documents():
 
 def split_documents(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        # Set a really small chunk size, just to show.
         chunk_size=500,
         chunk_overlap=100,
         length_function=len,
@@ -21,4 +20,6 @@ def split_documents(documents: list[Document]):
 documents = load_documents()
 chunks = split_documents(documents)
 embedding = HuggingFaceEmbeddings()
+
+# create vectore store into chromadb
 vectorstore = Chroma.from_documents(documents=chunks, embedding=embedding, persist_directory="./chroma_db")
