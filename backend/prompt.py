@@ -6,17 +6,14 @@ from langchain_core.output_parsers import StrOutputParser
 
 llm = ChatOllama(model="llama3")
 
-def main():
-
+def ask_prompt(prompt: str) -> str:
     embedding = HuggingFaceEmbeddings()
 
     # load vector store
     db = Chroma(persist_directory='./chroma_db', embedding_function=embedding)
 
-    user_question = "Does this plan cover dental services"
-
     # get associated chunks and format structure
-    results = db._similarity_search_with_relevance_scores(user_question, k=4)
+    results = db._similarity_search_with_relevance_scores(prompt, k=4)
     context_text = "\n  --\n".join([doc.page_content for doc, score in results])
 
     PROMPT_TEMPLATE = """
@@ -27,12 +24,11 @@ def main():
         {question}
     """
 
-    prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+    prompt_serve = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 
-    chain = prompt | llm | StrOutputParser()
+    chain = prompt_serve | llm | StrOutputParser()
 
-    print(chain.invoke({"context": context_text, "question": user_question}))
+    return chain.invoke({"context": context_text, "question": prompt})
 
-main()
 
 
