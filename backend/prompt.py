@@ -25,9 +25,9 @@ def ask_prompt(prompt: str) -> str:
     """
 
     prompt_serve = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-
+    print("Bouta pass in prompt")
     chain = prompt_serve | llm | StrOutputParser()
-
+    
     return chain.invoke({"context": context_text, "question": prompt})
 
 
