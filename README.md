@@ -1,8 +1,8 @@
 # Med Assist
 
-## Designed to help you better understand your health insurance coverage in an easy and accessible way.
+Designed to help you better understand your health insurance coverage in an easy and accessible way.
 
-## Checkout my Devpost Submission!
+Checkout the Devpost Submission!
 https://devpost.com/software/med-assist-40kt2u
 
 ## To run:
