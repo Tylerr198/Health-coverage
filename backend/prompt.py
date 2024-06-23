@@ -6,16 +6,19 @@ from langchain_core.output_parsers import StrOutputParser
 
 llm = ChatOllama(model="llama3")
 
-def ask_prompt(prompt: str) -> str:
+def ask_prompt(prompt: str, file_name: str) -> str:
     embedding = HuggingFaceEmbeddings()
 
     # load vector store
-    db = Chroma(persist_directory='./chroma_db', embedding_function=embedding)
-
+    db = Chroma(persist_directory='backend/chroma_db', embedding_function=embedding)
+    retreiver = db.as_retriever(search_type="mmr", search_kwargs={'k': 5, 'fetch_k': 5, 'filter': {'filename': {"$eq": file_name}}})
+    
     # get associated chunks and format structure
-    results = db._similarity_search_with_relevance_scores(prompt, k=4)
-    context_text = "\n  --\n".join([doc.page_content for doc, score in results])
-
+    results = retreiver.invoke(prompt)
+    context_text = "\n  --\n".join([doc.page_content for doc in results])
+    sources = [doc.metadata['filename'] for doc in results]
+    
+    # prompt template to be given to llm
     PROMPT_TEMPLATE = """
         Answer the following question based on the following context:
         {context}
@@ -25,10 +28,10 @@ def ask_prompt(prompt: str) -> str:
     """
 
     prompt_serve = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    print("Bouta pass in prompt")
     chain = prompt_serve | llm | StrOutputParser()
-    
-    return chain.invoke({"context": context_text, "question": prompt})
-
+    response = chain.invoke({"context": context_text, "question": prompt})
+    print_all = f"Response: {response} \nSources: {sources}"
+    print(print_all)
+    return response
 
 
