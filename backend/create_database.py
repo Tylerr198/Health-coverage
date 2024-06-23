@@ -5,8 +5,13 @@ from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 def load_documents():
-    document_loader = PyPDFDirectoryLoader('data/')
-    return document_loader.load()
+    document_loader = PyPDFDirectoryLoader('backend/data')
+    documents = document_loader.load()
+
+    # add metadata to use for filtering
+    for document in documents:
+        document.metadata['filename'] = document.metadata['source'][13:-4]
+    return documents
 
 def split_documents(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
@@ -22,4 +27,4 @@ chunks = split_documents(documents)
 embedding = HuggingFaceEmbeddings()
 
 # create vectore store into chromadb
-vectorstore = Chroma.from_documents(documents=chunks, embedding=embedding, persist_directory="./chroma_db")
+vectorstore = Chroma.from_documents(documents=chunks, embedding=embedding, persist_directory="backend/chroma_db")
